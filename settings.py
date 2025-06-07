@@ -10,5 +10,8 @@ class Setting:
     db_password = os.getenv('DB_PASSWORD')
     db_host = os.getenv('DB_HOST')
     db_port = os.getenv('DB_PORT')
-    db_url = f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}/{db_name}" # Данные можно убрать в ENV, но для локалки норм
+    db_url = f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}/{db_name}"
     bot_token = os.getenv('BOT_TOKEN')
+    admin_chat_id = os.getenv('ADMIN_CHAT_ID')
+    admin_group_id = os.getenv('ADMIN_GROUP_ID')
+

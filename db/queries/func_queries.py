@@ -1,15 +1,13 @@
 from db.connector import DatabaseConnector
-from db.queries.queries_user_utils import UserUtilsQueryService
 from db.models import *
 
 from sqlalchemy import select, delete
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time, date
 
 
-class UserQueryService:
+class QueryService:
     __db = DatabaseConnector()
-    __query_utils = UserUtilsQueryService()
 
 
     async def create_user(self, user_id: int, username: str, first_name: str, last_name: str):
@@ -163,7 +161,7 @@ class UserQueryService:
                 order_id=order_id,
                 telegram_id=order_data["user_id"],
                 total_amount=order_data["summ_price"],
-                order_status="IN_PROCESSING",
+                order_status="PENDING",
                 completion_date=order_data["completion_date"]
             )
             session.add(query)
@@ -199,7 +197,7 @@ class UserQueryService:
             await session.commit()
 
 
-    async def change_order_status_after_payment(self, order_id):
+    async def change_order_status_after_payment(self, order_id, flag: bool):
         async with self.__db.get_session() as session:
 
             query = await session.get(
@@ -207,7 +205,11 @@ class UserQueryService:
                 order_id
             )
 
-            query.order_status = "COMPLETE"
+            if flag:
+                query.order_status = "ON_HOLD"
+
+            else:
+                query.order_status = "FAILED"
 
             await session.commit()
 
@@ -217,8 +219,6 @@ class UserQueryService:
 
     async def get_products_by_name(self, data):
         async with self.__db.get_session() as session:
-
-            print(data, 123213123113212312)
 
             query = (
                 select(
@@ -254,3 +254,70 @@ class UserQueryService:
 
             return result.mappings().all()
 
+
+    async def get_upcoming_order(self):
+        async with self.__db.get_session() as session:
+            today_start = datetime.combine(date.today(), time.min)
+
+            query = (
+                select(
+                    User.username,
+                    Order.order_status,
+                    Order.completion_date,
+                    Order.order_date
+                )
+                .join(User, User.telegram_id == Order.telegram_id)
+                .where(Order.completion_date >= today_start)
+                .where(Order.order_status == "IN_PROGRESS")
+            )
+
+            result = await session.execute(query)
+
+            return result.mappings().all()
+
+
+    #--------------------------------------------------------------------------------------
+
+    async def complete_order_status(self, order_id: str):
+        async with self.__db.get_session() as session:
+            query = await session.get(
+                Order,
+                order_id
+            )
+
+            query.order_status = "COMPLETED"
+
+            await session.commit()
+
+
+    async def get_order_by_status(self, status):
+        async with self.__db.get_session() as session:
+            query = (
+                select(
+                    Order.order_id,
+                    User.username,
+                    Product.name.label("product_name"),
+                    OrderItem.quantity
+                )
+                .join(User, User.telegram_id == Order.telegram_id)
+                .join(OrderItem, OrderItem.order_id == Order.order_id)
+                .join(Product, Product.product_id == OrderItem.product_id)
+                .where(Order.order_status == status)
+                .order_by(Order.order_id)
+            )
+
+            result = await session.execute(query)
+
+            return result.mappings().all()
+
+
+    async def get_to_work_order(self, order_id):
+        async with self.__db.get_session() as session:
+            query = await session.get(
+                Order,
+                order_id
+            )
+
+            query.order_status = "IN_PROGRESS"
+
+            await session.commit()

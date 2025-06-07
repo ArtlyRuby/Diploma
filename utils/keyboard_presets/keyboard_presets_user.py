@@ -1,11 +1,11 @@
-from db.queries.queries_user import UserQueryService
+from db.queries.func_queries import QueryService
 
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
 class UserKeyboardPreset:
-    __query = UserQueryService()
+    __query = QueryService()
 
     @staticmethod
     def get_inline_keyboard(keyboard: list, button_order: list):
@@ -37,6 +37,21 @@ class UserKeyboardPreset:
         ]
 
         return self.get_inline_keyboard(keyboard, [2, 2])
+
+
+    def get_main_preset_admin(self):
+        keyboard = [
+            [
+                InlineKeyboardButton(text="Поиск товара", callback_data="search_by"),
+                InlineKeyboardButton(text="Список категорий", callback_data="category_list"),
+                InlineKeyboardButton(text="Корзина", callback_data="cart"),
+                InlineKeyboardButton(text="Помощь", callback_data="help"),
+                InlineKeyboardButton(text="Открыть админ панель", callback_data="open_admin_menu")
+            ]
+        ]
+
+        return self.get_inline_keyboard(keyboard, [2, 2, 1])
+
 
     def get_category_list_preset(self):
         keyboard = [

@@ -1,9 +1,8 @@
-from db.queries.queries_user import UserQueryService
-from uuid import uuid4
+from db.queries.func_queries import QueryService
 
 
-class TelegramUserService:
-    query = UserQueryService()
+class TelegramFuncService:
+    query = QueryService()
 
     async def create_cart(self, user_id: int):
         try:
@@ -68,11 +67,9 @@ class TelegramUserService:
             return None
 
 
-    async def place_order_sequence(self, user_id: int):
+    async def place_order_sequence(self, user_id: int, order_id: str):
         try:
             cart_data = await self.get_cart_items(user_id)
-
-            order_id = f"ORDER_{uuid4()}"
 
             await self.query.place_order_into_orders(user_id, cart_data, order_id)
 
@@ -80,9 +77,10 @@ class TelegramUserService:
 
             await self.query.clear_cart_after_payment(user_id)
 
-            await self.query.change_order_status_after_payment(order_id)
+            await self.query.change_order_status_after_payment(order_id, True)
 
         except Exception as e:
+            await self.query.change_order_status_after_payment(order_id, False)
             print(f"Что-то пошло не так при попытке обработать заказ: {e}")
 
 
@@ -102,4 +100,38 @@ class TelegramUserService:
             print(f"Что-то пошло не так при попытке начать поиск: {e}")
 
             return None
+
+
+    async def get_upcoming_order(self):
+        try:
+            return await self.query.get_upcoming_order()
+
+        except Exception as e:
+            print(f"Что-то пошло не так при попытке обработать предстоящие готовые заказы: {e}")
+            return None
+
+
+    async def complete_order_status(self, order_id: str):
+        try:
+            await self.query.complete_order_status(order_id)
+
+        except Exception as e:
+            print(f"Что-то пошло не так при попытке смены статуса заказа: {e}")
+
+
+    async def get_order_by_status(self, status):
+        try:
+            return await self.query.get_order_by_status(status)
+
+        except Exception as e:
+            print(f"Что-то пошло не так при попытке обработать заказы в статусе ON_HOLD: {e}")
+            return None
+
+
+    async def get_to_work_order(self, order_id):
+        try:
+            await self.query.get_to_work_order(order_id)
+
+        except Exception as e:
+            print(f"Что-то пошло не так при попытке обработать статус заказа в работу: {e}")
 
