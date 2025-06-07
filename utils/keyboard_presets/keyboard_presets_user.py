@@ -42,10 +42,6 @@ class UserKeyboardPreset:
     def get_main_preset_admin(self):
         keyboard = [
             [
-                InlineKeyboardButton(text="Поиск товара", callback_data="search_by"),
-                InlineKeyboardButton(text="Список категорий", callback_data="category_list"),
-                InlineKeyboardButton(text="Корзина", callback_data="cart"),
-                InlineKeyboardButton(text="Помощь", callback_data="help"),
                 InlineKeyboardButton(text="Открыть админ панель", callback_data="open_admin_menu")
             ]
         ]

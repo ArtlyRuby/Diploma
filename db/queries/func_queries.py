@@ -321,3 +321,21 @@ class QueryService:
             query.order_status = "IN_PROGRESS"
 
             await session.commit()
+
+
+    async def get_user_order_data(self, order_id):
+        async with self.__db.get_session() as session:
+            query = (
+                select(
+                    Order.telegram_id,
+                    Product.name.label("product_name"),
+                    OrderItem.quantity
+                )
+                .join(OrderItem, OrderItem.order_id == Order.order_id)
+                .join(Product, Product.product_id == OrderItem.product_id)
+                .where(Order.order_id == order_id)
+            )
+
+            result = await session.execute(query)
+
+            return result.mappings().all()

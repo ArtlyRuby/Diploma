@@ -21,7 +21,7 @@ class AdminKeyboardPreset:
     def get_main_preset(self):
         keyboard = [
             [
-                InlineKeyboardButton(text="Проверить в работе", callback_data="complete_order"),
+                InlineKeyboardButton(text="Проверить заказы в работе", callback_data="complete_order"),
                 InlineKeyboardButton(text="Проверить заказы в ожидании", callback_data="check_active_orders"),
             ]
         ]
@@ -43,7 +43,7 @@ class AdminKeyboardPreset:
     def get_order_completed_button_preset(self, order_id):
         keyboard = [
             [
-                InlineKeyboardButton(text="Заказ завершён", callback_data=f"order_completed_{order_id}"),
+                InlineKeyboardButton(text="Завершить заказ", callback_data=f"order_completed_{order_id}"),
                 InlineKeyboardButton(text="Вернуться в меню", callback_data="open_admin_menu")
             ]
         ]

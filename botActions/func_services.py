@@ -135,3 +135,12 @@ class TelegramFuncService:
         except Exception as e:
             print(f"Что-то пошло не так при попытке обработать статус заказа в работу: {e}")
 
+
+    async def get_user_order_data(self, order_id):
+        try:
+            return await self.query.get_user_order_data(order_id)
+
+        except Exception as e:
+            print(f"Что-то пошло не так при попытке узнать user_id по order_id: {e}")
+            return None
+

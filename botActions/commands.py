@@ -42,17 +42,24 @@ class Handler:
 
                 await self.func_service.create_cart(user_id)
 
-                kb = self.user_kb.get_main_preset()
-
                 if int(user_id) == int(self.admin_id):
                     kb = self.user_kb.get_main_preset_admin()
+                    await message.answer(
+                        "Открыта админ панель для работы с заказами. Используйте кнопки для взаимодействия с "
+                        "админ панелью!",
+                        reply_markup=kb
+                    )
 
-                await message.answer(
-                    "Привет, пользователь, добро пожаловать в наш онлайн-магазин мебели.\n"
-                    "Здесь ты можешь найти много различных товаров и приобрести их по доступной цене!\n"
-                    "Для взаимодействия с онлайн-магазином представляем тебе интерфейс с кнопками ниже!",
-                    reply_markup=kb
-                )
+                else:
+                    kb = self.user_kb.get_main_preset()
+
+                    await message.answer(
+                        "Привет, пользователь, добро пожаловать в наш онлайн-магазин мебели.\n"
+                        "Здесь ты можешь найти много различных товаров и приобрести их по доступной цене!\n"
+                        "Для взаимодействия с онлайн-магазином представляем тебе интерфейс с кнопками ниже!",
+                        reply_markup=kb
+                    )
+
 
             except Exception as e:
                 print(f"Ошибка при обработке /start: {e}")
@@ -407,6 +414,22 @@ class Handler:
                 order_id = f"ORDER_{callback.data.split("_")[-1]}"
 
                 await self.func_service.complete_order_status(order_id)
+
+                order_data = await self.func_service.get_user_order_data(order_id)
+
+                message_text = (
+                    f"📦ID заказа: `{order_id}`\n"
+                    f"🛒Состав заказа:\n"
+                )
+
+                for i in order_data:
+                    message_text += (
+                        f"  - {i['product_name']} × {i['quantity']}\n"
+                    )
+
+                await self.bot.send_message(chat_id=order_data[0]['telegram_id'],
+                                            text=f"Ваш заказ готов:\n"
+                                                 f"{message_text}")
 
                 await callback.message.answer(f"Заказ с Order_id: {order_id}, успешно закончен",
                                               reply_markup=self.admin_kb.get_main_preset()
